@@ -1,2 +1,4 @@
 # Ignorar carpeta de pruebas manuales
 /dev/
+
+/node_modules/
