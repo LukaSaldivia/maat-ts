@@ -1,3 +1,5 @@
+import sanitizeQuery from "src/vendor/sanitizeQuery"
+
 export default abstract class Filter<C extends string>{
   field : C
   score : number
@@ -8,4 +10,8 @@ export default abstract class Filter<C extends string>{
   }
 
   abstract get() : string
+
+  sanitize(arg : string) : string {
+    return sanitizeQuery(arg)
+  }
 }
