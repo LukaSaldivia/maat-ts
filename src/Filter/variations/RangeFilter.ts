@@ -1,4 +1,4 @@
-import Filter from "../Filter.js";
+import Filter from "../Filter";
 
 export default class RangeFilter<C extends string> extends Filter<C>{
   min : string | number

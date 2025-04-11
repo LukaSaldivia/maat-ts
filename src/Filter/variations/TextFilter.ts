@@ -1,5 +1,5 @@
 import  getAccumulated  from "../../vendor/getAccumulated";
-import Filter from "../Filter.js";
+import Filter from "../Filter";
 
 export default class TextFilter<C extends string> extends Filter<C>{
   txt = ''
