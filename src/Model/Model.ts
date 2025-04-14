@@ -15,7 +15,7 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
     this.filterCollection = new FilterCollection()
   }
 
-  create(data: Record<C, string | number>) {
+  create(data: Partial<Record<C, string | number>>) {
     let cols = Object.keys(data)
     let placeholders = new Array(cols.length).fill('?')
 
