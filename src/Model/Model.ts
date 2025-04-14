@@ -15,35 +15,75 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
     this.filterCollection = new FilterCollection()
   }
 
-  create(data: Partial<Record<C, string | number>>) {
-    let cols = Object.keys(data)
+  create(data: Partial<Record<C, string | number>>, appliedFields? : C[]) {
+
+    let filteredData = {...data}
+
+    if (appliedFields?.length) {
+
+      for (const key in filteredData) {
+        if (!appliedFields?.includes(key as C)) {
+          delete filteredData[key]
+        }
+      }
+
+    }
+
+    let cols = Object.keys(filteredData)
+    
     let placeholders = new Array(cols.length).fill('?')
 
     let query = `INSERT INTO ${this.table.tableName} (${cols.join(',')}) VALUES (${placeholders.join(',')})`
 
-    return this.executeQuery(query, Object.values(data))
+
+    return this.executeQuery(query, Object.values(filteredData))
   }
 
-  createBundle(arr: Record<C, string | number>[]) {
-    let fields = Object.keys(arr[0])
+  createBundle(arr: Record<C, string | number>[], appliedFields? : C[]) {
+    const appliedFieldsSet = appliedFields ? new Set(appliedFields) : null;
+    const filteredData = arr.map(data => {
+      const filtered: Partial<Record<C, string | number>> = {};
+      
+      for (const key in data) {
+        if (!appliedFieldsSet || appliedFieldsSet.has(key as C)) {
+          filtered[key as C] = data[key];
+        }
+      }
+      return filtered;
+    });
+
+    let fields = Object.keys(filteredData[0])
     let query = "INSERT INTO " + this.table.tableName + `(${fields.join(',')}) VALUES `
-    let placeholders = arr.map(_ => `(${new Array(fields.length).fill('?').join(',')})`).join(', ')
+    let placeholders = filteredData.map(_ => `(${new Array(fields.length).fill('?').join(',')})`).join(', ')
     query += placeholders
-    let values = arr.map<string[]>(obj => Object.values(obj)).flat()
+    let values = filteredData.map<string[]>(obj => Object.values(obj)).flat()
 
     return this.executeQuery(query, values)
 
   }
 
-  edit(data: Record<C, string | number>, pk: Record<PK[number], string>) {
+  edit(data: Record<C, string | number>, pk: Record<PK[number], string>, appliedFields? : C[]) {
 
-    let updates = Object.keys(data).map(col => `${col} = ?`).join(", ");
+    let filteredData = {...data}
+
+    if (appliedFields?.length) {
+
+      for (const key in filteredData) {
+        if (!appliedFields?.includes(key as C)) {
+          delete filteredData[key]
+        }
+      }
+
+    }
+
+
+    let updates = Object.keys(filteredData).map(col => `${col} = ?`).join(", ");
 
     const { conditions, values } = this.buildPK(pk)
 
     let query = `UPDATE ${this.table.tableName} SET ${updates} WHERE ${conditions}`;
 
-    return this.executeQuery(query, [...Object.values(data), ...values] as string[]);
+    return this.executeQuery(query, [...Object.values(filteredData), ...values] as string[]);
 
   }
 
