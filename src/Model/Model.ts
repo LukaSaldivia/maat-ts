@@ -92,7 +92,7 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
     let relevanceCalculation = cases.join(' + ');
     
     // Construir la consulta
-    let query = `SELECT * FROM (SELECT *, (${relevanceCalculation}) AS relevance FROM ${this.table.tableName}) AS subquery WHERE relevance >= ${minScore}`;
+    let query = `SELECT response.* FROM (SELECT *, (${relevanceCalculation}) AS relevance FROM ${this.table.tableName}) AS response WHERE response.relevance >= ${minScore}`;
     
     // Manejar ordenación
     let sortBy = options.sortBy || [];
