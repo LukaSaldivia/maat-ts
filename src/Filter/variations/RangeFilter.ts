@@ -9,15 +9,11 @@ export default class RangeFilter<C extends string> extends Filter<C>{
     this.max = max
   }
 
-  get(){
-      let cases : string[] = []
-      cases.push(this._buildCaseQuery(this.min, this.max))
-      cases.unshift(this.fallbackCase)
-      return cases.join('+')
-    
+  value(): string[] {
+      return [String(this.min), String(this.max)]
   }
 
-  _buildCaseQuery(min : string | number, max : string | number){
-    return this.sanitize(`CASE WHEN ${String(this.field)} BETWEEN "${min}" AND "${max}" THEN ${this.score} ELSE 0 END`)
+  _buildCaseQuery(){
+    return `CASE WHEN ${String(this.field)} BETWEEN "?" AND "?" THEN ${this.score} ELSE 0 END`
   }
 }

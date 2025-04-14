@@ -7,15 +7,11 @@ export default class StrictTextFilter<C extends string> extends Filter<C>{
     this.txt = txt
   }
 
-  get(){
-      let cases : string[] = []
-      cases.push(this._buildCaseQuery(this.txt))
-      cases.unshift(this.fallbackCase)
-      return cases.join('+')
-    
+  value(): string[] {
+      return [this.txt]
   }
 
-  _buildCaseQuery(txt : string){
-    return this.sanitize(`CASE WHEN ${String(this.field)} = ${txt} THEN ${this.score} ELSE 0 END`)
+  _buildCaseQuery(){
+    return `CASE WHEN ${String(this.field)} = ? THEN ${this.score} ELSE 0 END`
   }
 }

@@ -11,13 +11,17 @@ export default class TextFilter<C extends string> extends Filter<C>{
 
   get(){
       let cases = getAccumulated(this.txt);
-      cases = cases.map(txt => this._buildCaseQuery(txt))
+      cases = cases.map(_ => this._buildCaseQuery())
       cases.unshift(this.fallbackCase)
       return cases.join('+')
     
   }
 
-  _buildCaseQuery(txt : string){
-    return this.sanitize(`CASE WHEN LOWER(${String(this.field)}) LIKE LOWER('%${txt}%') THEN ${this.score} ELSE 0 END`)
+  value(){
+    return getAccumulated(this.txt).map(txt => `%${txt}%`)
+  }
+
+  _buildCaseQuery(){
+    return `CASE WHEN LOWER(${String(this.field)}) LIKE LOWER(?) THEN ${this.score} ELSE 0 END`
   }
 }

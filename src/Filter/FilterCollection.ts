@@ -1,16 +1,16 @@
 import Filter from "./Filter.js";
 import { FilterOptions } from "./FilterOptions.js";
 
-import RangeFilter from "./variations/RangeFilter.js";
-import TextFilter from "./variations/TextFilter.js";
-import DateFilter from "./variations/DateFilter.js";
-import NumberFilter from "./variations/NumberFilter.js";
-import StrictTextFilter from "./variations/StrictTextFilter.js";
+import RangeFilter from "./variations/RangeFilter";
+import TextFilter from "./variations/TextFilter";
+import DateFilter from "./variations/DateFilter";
+import NumberFilter from "./variations/NumberFilter";
+import StrictTextFilter from "./variations/StrictTextFilter";
 
 
 export default class FilterCollection<C extends string>{
   filters : Filter<C>[] = []
-  map = {
+  private map = {
     "range" : (options : FilterOptions<C>) : Filter<C> => {
       if (options.type != 'range') {
         throw new Error()

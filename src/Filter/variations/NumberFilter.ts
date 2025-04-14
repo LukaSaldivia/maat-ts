@@ -7,15 +7,11 @@ export default class NumberFilter<C extends string> extends Filter<C>{
     this.num = num
   }
 
-  get(){
-      let cases : string[] = []
-      cases.push(this._buildCaseQuery(this.num))
-      cases.unshift(this.fallbackCase)
-      return cases.join('+')
-    
+  value(): string[] {
+      return [String(this.num)]
   }
 
-  _buildCaseQuery(num : number){
-    return this.sanitize(`CASE WHEN ${String(this.field)} = ${num} THEN ${this.score} ELSE 0 END`)
+  _buildCaseQuery(){
+    return `CASE WHEN ${String(this.field)} = ? THEN ${this.score} ELSE 0 END`
   }
 }

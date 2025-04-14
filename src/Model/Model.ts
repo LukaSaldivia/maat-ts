@@ -1,14 +1,18 @@
+import FilterCollection from "../Filter/FilterCollection";
 import { Table } from "../Table/Table";
 import { Queryable } from "./types";
+import Filter from "src/Filter/Filter";
 
 export default class Model<C extends string, PK extends C[], SQLResult> {
 
   table: Table<C, PK>
   database: Queryable<SQLResult>
+  filterCollection: FilterCollection<C>
 
   constructor(table: Table<C, PK>, database: Queryable<SQLResult>) {
     this.table = table
     this.database = database
+    this.filterCollection = new FilterCollection()
   }
 
   create(data: Record<C, string | number>) {
@@ -57,10 +61,66 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
     return this.executeQuery(query, values)
   }
 
-  search(){
-    // TODO
+  prepareSearch() {
+    this.filterCollection = new FilterCollection<C>()
+    return this.filterCollection
   }
 
+  search(
+    minScore = 0,
+    options: {
+      sortBy?: { field: C | "relevance", order: "ASC" | "DESC" }[],
+      limit?: number,
+      offset?: number
+    } = { limit: 15, offset: 0 }
+  ) {
+    // Obtener las expresiones CASE de los filtros
+    let filterValues : string[] = []
+    let cases = this.filterCollection.filters.map((filter: Filter<C>) => {
+      filter.value().forEach(value => {        
+        filterValues.push(value)
+      })
+      return filter.get()
+    });
+    
+    // Si no hay filtros, usar minScore como relevancia básica
+    if (cases.length === 0) {
+      cases.push(String(minScore));
+    }
+    
+    // Combinar las expresiones CASE para calcular la relevancia
+    let relevanceCalculation = cases.join(' + ');
+    
+    // Construir la consulta
+    let query = `SELECT * FROM (SELECT *, (${relevanceCalculation}) AS relevance FROM ${this.table.tableName}) AS subquery WHERE relevance >= ${minScore}`;
+    
+    // Manejar ordenación
+    let sortBy = options.sortBy || [];
+    let sortQuery = [];
+    
+    for (const sortObj of sortBy) {
+      const field = sortObj.field === 'relevance' ? 'relevance' : sortObj.field;
+      sortQuery.push(`${field} ${sortObj.order || "ASC"}`);
+    }
+    
+    // Ordenar por relevancia descendente por defecto si no hay otros criterios
+    if (sortQuery.length === 0) {
+      sortQuery.push('relevance DESC');
+    }
+    
+    // Añadir ORDER BY a la consulta
+    if (sortQuery.length > 0) {
+      query += ` ORDER BY ${sortQuery.join(', ')}`;
+    }
+    
+    // Añadir LIMIT y OFFSET
+    query += ` LIMIT ${options.limit || 15}`;
+    if (options.offset) {
+      query += ` OFFSET ${options.offset}`;
+    }
+    
+    return this.executeQuery(query, filterValues);
+  }
 
 
   executeQuery(query: string, values?: string[]) {
