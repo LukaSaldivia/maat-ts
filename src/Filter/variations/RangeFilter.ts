@@ -14,6 +14,6 @@ export default class RangeFilter<C extends string> extends Filter<C>{
   }
 
   _buildCaseQuery(){
-    return `CASE WHEN ${String(this.field)} BETWEEN "?" AND "?" THEN ${this.score} ELSE 0 END`
+    return `CASE WHEN ${String(this.field)} BETWEEN ? AND ? THEN ${this.score} ELSE 0 END`
   }
 }
