@@ -68,6 +68,7 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
 
   search(
     minScore = 0,
+    fields : (C | "relevance" | "*")[] = ["*"],
     options: {
       sortBy?: { field: C | "relevance", order: "ASC" | "DESC" }[],
       limit?: number,
@@ -90,9 +91,12 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
     
     // Combinar las expresiones CASE para calcular la relevancia
     let relevanceCalculation = cases.join(' + ');
+
+    // Obtener los campos a devolver
+    let selects = fields.map( field => `response.${field}`).join(", ")
     
     // Construir la consulta
-    let query = `SELECT response.* FROM (SELECT *, (${relevanceCalculation}) AS relevance FROM ${this.table.tableName}) AS response WHERE response.relevance >= ${minScore}`;
+    let query = `SELECT ${selects} FROM (SELECT *, (${relevanceCalculation}) AS relevance FROM ${this.table.tableName}) AS response WHERE response.relevance >= ${minScore}`;
     
     // Manejar ordenación
     let sortBy = options.sortBy || [];
