@@ -15,9 +15,9 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
     this.filterCollection = new FilterCollection()
   }
 
-  create(data: Partial<Record<C, string | number>>, appliedFields? : C[]) {
+  create(data: Partial<Record<C, string | number>>, appliedFields?: C[]) {
 
-    let filteredData = {...data}
+    let filteredData = { ...data }
 
     if (appliedFields?.length) {
 
@@ -30,7 +30,7 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
     }
 
     let cols = Object.keys(filteredData)
-    
+
     let placeholders = new Array(cols.length).fill('?')
 
     let query = `INSERT INTO ${this.table.tableName} (${cols.join(',')}) VALUES (${placeholders.join(',')})`
@@ -39,11 +39,11 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
     return this.executeQuery(query, Object.values(filteredData))
   }
 
-  createBundle(arr: Record<C, string | number>[], appliedFields? : C[]) {
+  createBundle(arr: Record<C, string | number>[], appliedFields?: C[]) {
     const appliedFieldsSet = appliedFields ? new Set(appliedFields) : null;
     const filteredData = arr.map(data => {
       const filtered: Partial<Record<C, string | number>> = {};
-      
+
       for (const key in data) {
         if (!appliedFieldsSet || appliedFieldsSet.has(key as C)) {
           filtered[key as C] = data[key];
@@ -62,9 +62,9 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
 
   }
 
-  edit(data: Record<C, string | number>, pk: Record<PK[number], string>, appliedFields? : C[]) {
+  edit(data: Record<C, string | number>, pk: Record<PK[number], string>, appliedFields?: C[]) {
 
-    let filteredData = {...data}
+    let filteredData = { ...data }
 
     if (appliedFields?.length) {
 
@@ -95,9 +95,13 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
 
   }
 
-  get(pk: Record<PK[number], string>) {
+  get(pk: Record<PK[number], string>, fields: (C | "*")[] = ["*"]) {
+
+    // Obtener los campos a devolver
+    let selects = fields.join(", ")
+
     const { conditions, values } = this.buildPK(pk)
-    const query = `SELECT * FROM ${this.table.tableName} WHERE ${conditions}`
+    const query = `SELECT ${selects} FROM ${this.table.tableName} WHERE ${conditions}`
     return this.executeQuery(query, values)
   }
 
@@ -108,7 +112,7 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
 
   search(
     minScore = 0,
-    fields : (C | "relevance" | "*")[] = ["*"],
+    fields: (C | "relevance" | "*")[] = ["*"],
     options: {
       sortBy?: { field: C | "relevance", order: "ASC" | "DESC" }[],
       limit?: number,
@@ -116,54 +120,58 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
     } = { limit: 15, offset: 0 }
   ) {
     // Obtener las expresiones CASE de los filtros
-    let filterValues : string[] = []
+    let filterValues: string[] = []
     let cases = this.filterCollection.filters.map((filter: Filter<C>) => {
-      filter.value().forEach(value => {        
+      filter.value().forEach(value => {
         filterValues.push(value)
       })
       return filter.get()
     });
-    
+
     // Si no hay filtros, usar minScore como relevancia básica
     if (cases.length === 0) {
       cases.push(String(minScore));
     }
-    
+
     // Combinar las expresiones CASE para calcular la relevancia
     let relevanceCalculation = cases.join(' + ');
 
     // Obtener los campos a devolver
-    let selects = fields.map( field => `response.${field}`).join(", ")
-    
+    let selects = fields.map(field => `response.${field}`).join(", ")
+
     // Construir la consulta
     let query = `SELECT ${selects} FROM (SELECT *, (${relevanceCalculation}) AS relevance FROM ${this.table.tableName}) AS response WHERE response.relevance >= ${minScore}`;
-    
+
     // Manejar ordenación
     let sortBy = options.sortBy || [];
     let sortQuery = [];
-    
+
     for (const sortObj of sortBy) {
       const field = sortObj.field === 'relevance' ? 'relevance' : sortObj.field;
       sortQuery.push(`${field} ${sortObj.order || "ASC"}`);
     }
-    
+
     // Ordenar por relevancia descendente por defecto si no hay otros criterios
     if (sortQuery.length === 0) {
       sortQuery.push('relevance DESC');
     }
-    
+
     // Añadir ORDER BY a la consulta
     if (sortQuery.length > 0) {
       query += ` ORDER BY ${sortQuery.join(', ')}`;
     }
-    
+
     // Añadir LIMIT y OFFSET
     query += ` LIMIT ${options.limit || 15}`;
     if (options.offset) {
       query += ` OFFSET ${options.offset}`;
     }
-    
+
     return this.executeQuery(query, filterValues);
+  }
+
+  groupedSearch() {
+
   }
 
 
