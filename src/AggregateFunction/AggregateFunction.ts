@@ -1,4 +1,4 @@
-import { Table } from "src/Table/Table";
+import { Table } from "../Table/Table";
 import AF from "./AF";
 
 export default class AggregateFunction{
