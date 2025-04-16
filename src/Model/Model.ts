@@ -1,3 +1,4 @@
+import AF from "../AggregateFunction/AF";
 import FilterCollection from "../Filter/FilterCollection";
 import { Table } from "../Table/Table";
 import { Queryable } from "./types";
@@ -147,7 +148,8 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
     let sortQuery = [];
 
     for (const sortObj of sortBy) {
-      const field = sortObj.field === 'relevance' ? 'relevance' : sortObj.field;
+      // const field = sortObj.field === 'relevance' ? 'relevance' : sortObj.field;
+      const { field }  = sortObj;
       sortQuery.push(`${field} ${sortObj.order || "ASC"}`);
     }
 
@@ -170,7 +172,81 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
     return this.executeQuery(query, filterValues);
   }
 
-  groupedSearch() {
+  groupedSearch(
+    minScore = 0,
+    fields: (C | "relevance" | AF<C, PK>)[],
+    options: {
+      sortBy?: { field: C | "relevance" | AF<C, PK>, order: "ASC" | "DESC", }[],
+      limit?: number,
+      offset?: number
+    } = { limit: 15, offset: 0 }
+  ) {
+
+    // Obtener las expresiones CASE de los filtros
+    let filterValues: string[] = []
+    let cases = this.filterCollection.filters.map((filter: Filter<C>) => {
+      filter.value().forEach(value => {
+        filterValues.push(value)
+      })
+      return filter.get()
+    });
+
+    // Si no hay filtros, usar minScore como relevancia básica
+    if (cases.length === 0) {
+      cases.push(String(minScore));
+    }
+
+    // Combinar las expresiones CASE para calcular la relevancia
+    let relevanceCalculation = cases.join(' + ');
+
+    // Obtener los campos a devolver
+    let selects = fields.map(field => field instanceof AF ? field.get(true) : `response.${field}`).join(", ")
+
+    // Construir la consulta
+    let query = `SELECT ${selects} FROM (SELECT *, (${relevanceCalculation}) AS relevance FROM ${this.table.tableName}) AS response WHERE response.relevance >= ${minScore}`;
+
+    // Manejar agrupamientos
+    // Manejar agrupamientos
+    let groupByFields = fields
+      .filter(field => !(field instanceof AF))
+      .map(field => `response.${field}`);
+
+    if (groupByFields.length > 0) {
+      query += ` GROUP BY ${groupByFields.join(', ')}`;
+    }
+
+    // Manejar ordenación
+    let sortBy = options.sortBy || [];
+    let sortQuery = [];
+
+    for (const sortObj of sortBy) {
+      let field  : string | AF<C,PK> = sortObj.field;
+
+      // Si el campo es una función de agregado, usar su resultado
+      if (field instanceof AF) {
+        field = field.get()
+      }
+
+      sortQuery.push(`${field} ${sortObj.order || "ASC"}`);
+    }
+
+    // Ordenar por relevancia descendente por defecto si no hay otros criterios
+    if (sortQuery.length === 0) {
+      sortQuery.push('relevance DESC');
+    }
+
+    // Añadir ORDER BY a la consulta
+    if (sortQuery.length > 0) {
+      query += ` ORDER BY ${sortQuery.join(', ')}`;
+    }
+
+    // Añadir LIMIT y OFFSET
+    query += ` LIMIT ${options.limit || 15}`;
+    if (options.offset) {
+      query += ` OFFSET ${options.offset}`;
+    }
+
+    return this.executeQuery(query, filterValues)
 
   }
 
