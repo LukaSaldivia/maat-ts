@@ -13,6 +13,6 @@ export default class DateFilter<C extends string> extends Filter<C> {
   }
 
   _buildCaseQuery() {
-    return `CASE WHEN ${String(this.field)} = ' ? ' THEN ${this.score} ELSE 0 END`;
+    return `CASE WHEN ${String(this.field)} = ?  THEN ${this.score} ELSE 0 END`;
   }
 }
