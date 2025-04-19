@@ -9,5 +9,5 @@
     "moduleResolution": "node",
     "baseUrl": "."
   },
-  "include": ["src", "dev", "index.js"]
+  "include": ["src", "dev", "index.ts"]
 }
