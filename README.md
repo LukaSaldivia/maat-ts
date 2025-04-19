@@ -5,7 +5,7 @@
 ![GitHub package.json version](https://img.shields.io/github/package-json/v/lukasaldivia/maat?color=ffffff)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/lukasaldivia/maat)
 
-Maat is a modular Typescript library for modeling CRUD operations over SQL databases. 
+Maat is a modular Typescript library for modeling CRUD operations over SQL databases.
 It provides advanced filtering and searching capabilities, and it's fully agnostic of the SQL engine — as long as your connection object exposes a `query(string, string[])` method.
 
 ## ✨ Features

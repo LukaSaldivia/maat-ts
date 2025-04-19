@@ -9,6 +9,10 @@
   "author": "Luka Saldivia",
   "license": "MIT",
   "description": "a modular Typescript library for modeling CRUD operations over SQL databases",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/LukaSaldivia/maat"
+  },
   "devDependencies": {
     "@types/node": "^22.14.1",
     "jsdoc-to-markdown": "^9.1.1",
