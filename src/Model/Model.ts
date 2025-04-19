@@ -2,7 +2,7 @@ import AF from "../AggregateFunction/AF";
 import FilterCollection from "../Filter/FilterCollection";
 import { Table } from "../Table/Table";
 import { Queryable } from "./types";
-import Filter from "src/Filter/Filter";
+import Filter from "../Filter/Filter";
 
 /**
  * Represents a generic data model for performing CRUD and search operations on a SQL table.
