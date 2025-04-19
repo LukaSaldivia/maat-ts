@@ -11,7 +11,7 @@
   "description": "a modular Typescript library for modeling CRUD operations over SQL databases",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/LukaSaldivia/maat"
+    "url": "git+https://github.com/LukaSaldivia/maat.git"
   },
   "devDependencies": {
     "@types/node": "^22.14.1",
