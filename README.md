@@ -1,4 +1,4 @@
-# 🪶Maat
+# 🪶Maat-ts
 
 ![GitHub last commit](https://img.shields.io/github/last-commit/lukasaldivia/maat)
 ![GitHub top language](https://img.shields.io/github/languages/top/lukasaldivia/maat)
@@ -19,7 +19,7 @@ It provides advanced filtering and searching capabilities, and it's fully agnost
 ## 📦 Installation
 
 ```bash
-npm i maat
+npm i maat-ts
 ```
 
 ## 🛠️ Basic usage
