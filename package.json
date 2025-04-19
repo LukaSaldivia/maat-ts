@@ -5,12 +5,13 @@
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
-  "keywords": [],
-  "author": "",
-  "license": "ISC",
-  "description": "",
+  "keywords": ["model", "mysql", "sql", "postgresql", "mariadb", "query"],
+  "author": "Luka Saldivia",
+  "license": "MIT",
+  "description": "a modular Typescript library for modeling CRUD operations over SQL databases",
   "devDependencies": {
     "@types/node": "^22.14.1",
+    "jsdoc-to-markdown": "^9.1.1",
     "mysql2": "^3.14.0",
     "ts-node": "^10.9.2",
     "typescript": "^5.8.3"

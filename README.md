@@ -1,9 +1,9 @@
 # 🪶Maat
+
 ![GitHub last commit](https://img.shields.io/github/last-commit/lukasaldivia/maat)
 ![GitHub top language](https://img.shields.io/github/languages/top/lukasaldivia/maat)
 ![GitHub package.json version](https://img.shields.io/github/package-json/v/lukasaldivia/maat?color=ffffff)
 ![GitHub code size in bytes](https://img.shields.io/github/languages/code-size/lukasaldivia/maat)
-
 
 Maat is a modular Typescript library for modeling CRUD operations over SQL databases. 
 It provides advanced filtering and searching capabilities, and it's fully agnostic of the SQL engine — as long as your connection object exposes a `query(string, string[])` method.
@@ -23,6 +23,7 @@ npm i maat
 ```
 
 ## 🛠️ Basic usage
+
 ```ts
 import { Queryable } from "src/Model/types";
 import Model from "../src/Model/Model";
@@ -159,7 +160,8 @@ userModel.groupedSearch(
 ```
 
 ## 📁 Project Structure
-```
+
+```txt
 📁 src
     📁 AggregateFunction
         📄 AF.ts
@@ -186,7 +188,9 @@ userModel.groupedSearch(
 ```
 
 ## 🤝 Contributing
+
 Contributions are welcome! Whether it's reporting bugs, suggesting improvements, or opening pull requests. Please follow the existing modular structure and include tests when possible.
 
 ## 📘 License
+
 MIT License
