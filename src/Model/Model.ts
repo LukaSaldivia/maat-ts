@@ -344,15 +344,31 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
     return res
   }
 
-  debug() : Model<C, PK, { query : string, values : string[] | undefined, sql : string}>{
+  /**
+   * Creates a debug-mode instance of the model, where queries are not executed
+   * but instead returned as an object containing:
+   * - the original query string,
+   * - the provided values,
+   * - and the resulting SQL string with interpolated values.
+   *
+   * This is useful for debugging and inspecting how queries are constructed
+   * without sending them to an actual database.
+   *
+   * @template C - The shape/type of the model's fields.
+   * @template PK - The type of the primary key (e.g. string or number).
+   *
+   * @returns {Model<C, PK, { query: string, values: string[] | undefined, sql: string }>}
+   * A new instance of the model where the `query()` method simulates SQL generation.
+   */
+  debug(): Model<C, PK, { query: string, values: string[] | undefined, sql: string }> {
 
     let db = {
-      query : function(query : string, values? : string[]){
+      query: function (query: string, values?: string[]) {
 
         let i = 0;
         let sql = query.replace(/\?/g, () => {
           if (values != undefined) {
-            
+
             const val = values[i++];
             if (val === null) return 'NULL';
             if (typeof val === 'number') return val;
