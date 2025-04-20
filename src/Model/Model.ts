@@ -344,6 +344,35 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
     return res
   }
 
+  debug() : Model<C, PK, { query : string, values : string[] | undefined, sql : string}>{
+
+    let db = {
+      query : function(query : string, values? : string[]){
+
+        let i = 0;
+        let sql = query.replace(/\?/g, () => {
+          if (values != undefined) {
+            
+            const val = values[i++];
+            if (val === null) return 'NULL';
+            if (typeof val === 'number') return val;
+            if (typeof val === 'boolean') return val ? 'TRUE' : 'FALSE';
+            return `'${String(val).replace(/'/g, "''")}'`;
+          }
+          return query
+        });
+
+        return {
+          query,
+          values,
+          sql
+        }
+      }
+    }
+
+    return new Model(this.table, db)
+  }
+
   /**
  * Builds a WHERE clause using the primary key.
  * 
