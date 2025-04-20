@@ -25,11 +25,8 @@ npm i maat-ts
 ## 🛠️ Basic usage
 
 ```ts
-import { Queryable } from "src/Model/types";
-import Model from "../src/Model/Model";
-import TableFactory from "../src/Table/TableFactory";
+import { Model, TableFactory, AggregateFunction, Queryable } from "maat-ts"
 import mysql, { FieldPacket, RowDataPacket } from 'mysql2';
-import AggregateFunction from "../src/AggregateFunction/AggregateFunction";
 
 type MySQLResult = Promise<[RowDataPacket[], FieldPacket[]]>
 
