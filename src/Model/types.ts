@@ -2,4 +2,6 @@ type Queryable<T = any> = {
   query: (sql: string, params?: string[]) => T;
 };
 
-export { Queryable }
+type DebugResult = { query: string, values: string[] | undefined, sql: string }
+
+export { Queryable, DebugResult }

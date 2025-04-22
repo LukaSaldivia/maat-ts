@@ -1,7 +1,7 @@
 import AF from "../AggregateFunction/AF";
 import FilterCollection from "../Filter/FilterCollection";
 import { Table } from "../Table/Table";
-import { Queryable } from "./types";
+import { DebugResult, Queryable } from "./types";
 import Filter from "../Filter/Filter";
 
 /**
@@ -11,7 +11,7 @@ import Filter from "../Filter/Filter";
  * @template PK - Primary key columns, subset of C.
  * @template SQLResult - The result type of a SQL query.
  */
-export default class Model<C extends string, PK extends C[], SQLResult> {
+export default class Model<C extends string, PK extends C[], SQLResult>{
 
   table: Table<C, PK>
   database: Queryable<SQLResult>
@@ -39,18 +39,18 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
   /**
    * Inserts a new row into the table.
    * 
-   * @param {Partial<Record<C, string | number>>} data - Data to insert.
-   * @param {C[]} [appliedFields] - Optional list of allowed columns.
-   * @returns {Promise<SQLResult>}
+   * @param {Partial<Record<C, string>>} data - Data to insert.
+   * @param {C[]} [allowedFields] - Optional list of allowed columns.
+   * @returns {SQLResult}
    */
-  create(data: Partial<Record<C, string | number>>, appliedFields?: C[]): SQLResult {
+  create(data: Partial<Record<C, string>>, allowedFields?: C[]): SQLResult {
 
     let filteredData = { ...data }
 
-    if (appliedFields?.length) {
+    if (allowedFields?.length) {
 
       for (const key in filteredData) {
-        if (!appliedFields?.includes(key as C)) {
+        if (!allowedFields?.includes(key as C)) {
           delete filteredData[key]
         }
       }
@@ -70,17 +70,17 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
   /**
  * Inserts multiple rows into the table.
  * 
- * @param {Record<C, string | number>[]} arr - Array of data objects to insert.
- * @param {C[]} [appliedFields] - Optional list of allowed columns.
+ * @param {Record<C, string>[]} arr - Array of data objects to insert.
+ * @param {C[]} [allowedFields] - Optional list of allowed columns.
  * @returns {SQLResult}
  */
-  createBundle(arr: Partial<Record<C, string | number>>[], appliedFields?: C[]): SQLResult {
-    const appliedFieldsSet = appliedFields ? new Set(appliedFields) : null;
+  createBundle(arr: Partial<Record<C, string>>[], allowedFields?: C[]): SQLResult {
+    const allowedFieldsSet = allowedFields ? new Set(allowedFields) : null;
     const filteredData = arr.map(data => {
-      const filtered: Partial<Record<C, string | number>> = {};
+      const filtered: Partial<Record<C, string>> = {};
 
       for (const key in data) {
-        if (!appliedFieldsSet || appliedFieldsSet.has(key as C)) {
+        if (!allowedFieldsSet || allowedFieldsSet.has(key as C)) {
           filtered[key as C] = data[key];
         }
       }
@@ -100,19 +100,19 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
   /**
  * Updates a row based on its primary key.
  * 
- * @param {Partial<Record<C, string | number>>} data - New data to apply.
+ * @param {Partial<Record<C, string>>} data - New data to apply.
  * @param {Record<PK[number], string>} pk - Primary key identifying the row.
- * @param {C[]} [appliedFields] - Optional list of fields to allow for updates.
+ * @param {C[]} [allowedFields] - Optional list of fields to allow for updates.
  * @returns {SQLResult}
  */
-  edit(data: Partial<Record<C, string | number>>, pk: Record<PK[number], string>, appliedFields?: C[]): SQLResult {
+  edit(data: Partial<Record<C, string>>, pk: Record<PK[number], string>, allowedFields?: C[]): SQLResult {
 
     let filteredData = { ...data }
 
-    if (appliedFields?.length) {
+    if (allowedFields?.length) {
 
       for (const key in filteredData) {
-        if (!appliedFields?.includes(key as C)) {
+        if (!allowedFields?.includes(key as C)) {
           delete filteredData[key]
         }
       }
@@ -133,12 +133,12 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
   /**
  * Deletes a row from the table using its primary key.
  * 
- * @param {Record<PK[number], string>} pk - Primary key of the row to delete.
+ * @param {Record<C, string>} columns - Primary key of the row to delete.
  * @returns {SQLResult}
  */
-  delete(pk: Record<PK[number], string>): SQLResult {
+  delete(columns: Partial<Record<C, string>>): SQLResult {
 
-    const { conditions, values } = this.buildPK(pk)
+    const { conditions, values } = this.buildEquals(columns)
     const query = `DELETE FROM ${this.table.tableName} WHERE ${conditions}`
     return this.executeQuery(query, values)
 
@@ -360,7 +360,7 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
    * @returns {Model<C, PK, { query: string, values: string[] | undefined, sql: string }>}
    * A new instance of the model where the `query()` method simulates SQL generation.
    */
-  debug(): Model<C, PK, { query: string, values: string[] | undefined, sql: string }> {
+  debug(): Model<C, PK, DebugResult> {
 
     let db = {
       query: function (query: string, values?: string[]) {
@@ -400,6 +400,13 @@ export default class Model<C extends string, PK extends C[], SQLResult> {
     const keys = Object.keys(pk)
     const conditions = keys.map(key => `${key} = ?`).join(" AND ")
     const values = keys.map(key => pk[key as PK[number]])
+    return { conditions, values }
+  }
+
+  private buildEquals(columns : Partial<Record<C, string>>) : { conditions: string; values: string[]; }{
+    const keys = Object.keys(columns)
+    const conditions = keys.map(key => `${key} = ?`).join(" AND ")
+    const values = keys.map(key => columns[key as C]) as string[]
     return { conditions, values }
   }
 
