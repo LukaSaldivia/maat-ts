@@ -435,11 +435,21 @@ Performs a grouped search using filters and aggregate functions.
 #### Example <!-- omit in toc -->
 
 ```ts
-const results = model.groupedSearch(0.5, ['name', { field: 'age', aggregate: 'COUNT' }], {
-  sortBy: [{ field: 'name', order: 'ASC' }],
-  limit: 10,
-  offset: 0
-});
+const { count } = AggregateFunction.from(userTable)
+
+userModel.groupedSearch(
+  0, // minimum score
+  [count("age", "age_count"), "age"], // returns "age_count" and "age" as columns. "age_count" is an alias to "COUNT(age)"
+  {
+    sortBy: [
+      {
+        field: "age",
+        order: "DESC"
+      }
+    ],
+    limit: 10
+  }
+)
 
 ```
 
