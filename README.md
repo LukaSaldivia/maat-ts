@@ -8,10 +8,12 @@
 Maat is a modular Typescript library for modeling CRUD operations over SQL databases.
 It provides advanced filtering and searching capabilities, and it's fully agnostic of the SQL engine (supports MySQL, PostgreSQL, SQLite and MariaDB).
 
+
+
 ## Table of contents <!-- omit in toc -->
 
 - [✨ Features](#-features)
-- [📦 Installation](#-installation)
+- [🚀 Getting Started](#-getting-started)
 - [`TableFactory`](#tablefactory)
   - [`.create(tableName, columns, primaryKey)`](#createtablename-columns-primarykey)
 - [`FilterCollection<C>`](#filtercollectionc)
@@ -43,10 +45,45 @@ It provides advanced filtering and searching capabilities, and it's fully agnost
 - Aggregation functions included
 - Designed to fit cleanly into MVC architectures or standalone use
 
-## 📦 Installation
+## 🚀 Getting Started
+
+### 📦 Installation <!-- omit in toc -->
 
 ```bash
 npm i maat-ts
+```
+
+### Creating the connection <!-- omit in toc -->
+
+```ts
+import { Queryable } from "maat-ts"
+import { GenericConnection, GenericResponseType } from "any-sql-library-you-want" // <- here you get the connection of the library you want (e.g. mysql2, pg, sqlite3)
+
+const connection : Queryable<GenericResponseType> = GenericConnection.getConnection()
+```
+> [!WARNING]
+> Please do not try to use GenericConnection or GenericResponseType, they don't exist, it's just for the example.
+
+### Creating the table with TableFactory <!-- omit in toc -->
+
+```ts
+import { TableFactory } from "maat-ts"
+
+const table = TableFactory.create(
+  "table", // table-name
+  ["col1", "col2", "col3"], // column(s) of the table 
+  ["col1"] // column(s) of the primary key of the table
+  )
+```
+
+### Creating the model <!-- omit in toc -->
+
+```ts
+import { Model } from "maat-ts"
+
+const TableModel = new Model(table, connection)
+
+// notice that every CRUD function, return type is GenericResponseType
 ```
 
 ## `TableFactory`
@@ -291,7 +328,7 @@ Deletes a row from the table using its primary key.
 
 #### Parameters <!-- omit in toc -->
 
-- `columns` (`Record<C, string>`) – An object representing the primary key of the row to delete. Keys must match the primary key columns of the table.
+- `columns` (`Record<C, string>`) – An object representing the columns of the row to delete. Keys must match the columns of the table.
 
 #### Returns <!-- omit in toc -->
 
@@ -328,7 +365,7 @@ Initializes the filter collection for search operations.
 
 #### Returns <!-- omit in toc -->
 
-- `FilterCollection<C>` – A filter collection that can be used to set up search criteria for subsequent queries.
+- [`FilterCollection<C>`](#filtercollectionc) – A filter collection that can be used to set up search criteria for subsequent queries.
 
 #### Example <!-- omit in toc -->
 
