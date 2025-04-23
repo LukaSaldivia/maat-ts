@@ -131,9 +131,9 @@ export default class Model<C extends string, PK extends C[], SQLResult>{
   }
 
   /**
- * Deletes a row from the table using its primary key.
+ * Deletes a row from the table using its columns.
  * 
- * @param {Record<C, string>} columns - Primary key of the row to delete.
+ * @param {Record<C, string>} columns - Columns values of the row to delete.
  * @returns {SQLResult}
  */
   delete(columns: Partial<Record<C, string>>): SQLResult {

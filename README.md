@@ -324,7 +324,7 @@ const result = model.edit(
 
 ### `.delete(columns)`
 
-Deletes a row from the table using its primary key.
+Deletes a row from the table using its columns.
 
 #### Parameters <!-- omit in toc -->
 
